@@ -420,46 +420,29 @@
 
   footer strong { color: var(--purple-700); }
 
-  /* ===================== Floating voice assistant orb ===================== */
-  /* Hide the widget's own default floating launcher — our .voice-fab icon
-     triggers it instead via startConversation(), so only one bubble shows. */
-  elevenlabs-convai { display: none; }
-
-  .voice-fab {
+  /* ===================== Floating voice assistant widget =====================
+     The ElevenLabs widget renders its own launcher/card — there is no public
+     startConversation() method in the currently shipped build (verified: the
+     custom element exposes no such method, only its documented attributes),
+     so it can no longer be hidden and driven by a custom button. Colors and
+     label are set via the widget's own supported attributes on the tag below
+     instead. A short CSS-only highlight (.voice-highlight) is toggled by the
+     header CTA to draw the eye to it without depending on any internal API. */
+  elevenlabs-convai {
     position: fixed;
     bottom: 26px;
     right: 26px;
-    width: 62px;
-    height: 62px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--magenta) 0%, var(--purple-600) 100%);
-    color: #fff;
-    border: none;
-    font-size: 26px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     z-index: 999;
-    transition: transform 0.15s ease;
-    box-shadow: 0 10px 26px rgba(230, 49, 126, 0.5);
   }
 
-  .voice-fab::before {
-    content: "";
-    position: absolute;
-    inset: -8px;
-    border-radius: 50%;
-    border: 2px solid rgba(230, 49, 126, 0.55);
-    animation: pulse-ring 2.2s ease-out infinite;
+  @keyframes widget-pulse {
+    0%, 100% { filter: drop-shadow(0 0 0 rgba(230, 49, 126, 0)); }
+    50% { filter: drop-shadow(0 0 14px rgba(230, 49, 126, 0.85)); }
   }
 
-  @keyframes pulse-ring {
-    0% { transform: scale(0.85); opacity: 0.8; }
-    100% { transform: scale(1.5); opacity: 0; }
+  elevenlabs-convai.voice-highlight {
+    animation: widget-pulse 0.7s ease-in-out 3;
   }
-
-  .voice-fab:hover { transform: scale(1.07); }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -482,7 +465,7 @@
   <p>Find quick answers below, or ask the voice assistant directly if you can't find what you need.</p>
   <div class="cta-row">
     <a href="#faq" class="btn btn-primary">Browse FAQ</a>
-    <button class="btn btn-ghost" onclick="startVoiceAgent()">🎙️ Ask the Voice Assistant</button>
+    <button class="btn btn-ghost" onclick="highlightVoiceAssistant()">🎙️ Ask the Voice Assistant</button>
   </div>
 </header>
 
@@ -666,46 +649,35 @@
 </footer>
 
 <!-- ===================== ELEVENLABS CONVERSATIONAL AI (VOICE BOT) EMBED =====================
-     The widget itself is hidden (see .voice-fab / "elevenlabs-convai { display: none }"
-     below) — its own floating trigger is replaced by our custom mic icon, which calls
-     startConversation() on the widget element by id. -->
-<elevenlabs-convai id="convaiWidget" agent-id="agent_7801kwb9b3kge1599qv88wdq5ydz"></elevenlabs-convai>
+     Renders its own launcher card (bottom-right) — the currently shipped
+     widget build has no public startConversation() method, so it can't be
+     hidden and driven by a separate custom button (confirmed by inspecting
+     the live element: only lifecycle callbacks are exposed, not a start
+     method). Brand colors and label are set via the widget's own supported
+     attributes instead. -->
+<elevenlabs-convai
+  id="convaiWidget"
+  agent-id="agent_7801kwb9b3kge1599qv88wdq5ydz"
+  avatar-orb-color-1="#ec447c"
+  avatar-orb-color-2="#765caa"
+  action-text="Ask the Voice Assistant"
+></elevenlabs-convai>
 <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
-
-<button class="voice-fab" onclick="startVoiceAgent()" aria-label="Ask the voice assistant" title="Ask the voice assistant">🎙️</button>
 
 <script>
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function startVoiceAgent() {
+  // The header CTA can't force the widget open (no public API for that in
+  // this build), so it just draws attention to where the real widget lives.
+  function highlightVoiceAssistant() {
     var widget = document.getElementById('convaiWidget');
     if (!widget) return;
-
-    function attemptStart() {
-      if (typeof widget.startConversation === 'function') {
-        try {
-          widget.startConversation();
-        } catch (err) {
-          console.error('Voice assistant failed to start:', err);
-          alert('Could not start the voice assistant. Please check your microphone permissions and try again.');
-        }
-      } else {
-        console.warn('ElevenLabs widget script has not finished loading yet — retrying in a moment.');
-        setTimeout(attemptStart, 300);
-      }
-    }
-
-    // The <elevenlabs-convai> custom element is only "upgraded" (i.e. gets its
-    // startConversation method) once the async widget script has loaded and
-    // registered it. If the button is clicked before that happens, calling
-    // startConversation() silently does nothing. Waiting on
-    // customElements.whenDefined() (with a poll fallback for older browsers)
-    // avoids that race condition instead of failing silently.
-    if (window.customElements && typeof customElements.whenDefined === 'function') {
-      customElements.whenDefined('elevenlabs-convai').then(attemptStart).catch(attemptStart);
-    } else {
-      attemptStart();
-    }
+    widget.scrollIntoView({ block: 'end', behavior: reduceMotion ? 'auto' : 'smooth' });
+    widget.classList.remove('voice-highlight');
+    // force reflow so the animation restarts if clicked again quickly
+    void widget.offsetWidth;
+    widget.classList.add('voice-highlight');
+    setTimeout(function () { widget.classList.remove('voice-highlight'); }, 2200);
   }
 
   /* ---------- Animated counter (question/category count) ---------- */
