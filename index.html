@@ -395,66 +395,6 @@
 
   footer strong { color: var(--purple-700); }
 
-  /* ===================== Floating voice assistant orb ===================== */
-  .voice-fab {
-    position: fixed;
-    bottom: 26px;
-    right: 26px;
-    width: 62px;
-    height: 62px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--magenta) 0%, var(--purple-600) 100%);
-    color: #fff;
-    border: none;
-    font-size: 26px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-    transition: transform 0.15s ease;
-    box-shadow: 0 10px 26px rgba(230, 49, 126, 0.5);
-  }
-
-  .voice-fab::before {
-    content: "";
-    position: absolute;
-    inset: -8px;
-    border-radius: 50%;
-    border: 2px solid rgba(230, 49, 126, 0.55);
-    animation: pulse-ring 2.2s ease-out infinite;
-  }
-
-  @keyframes pulse-ring {
-    0% { transform: scale(0.85); opacity: 0.8; }
-    100% { transform: scale(1.5); opacity: 0; }
-  }
-
-  .voice-fab:hover { transform: scale(1.07); }
-
-  .toast {
-    position: fixed;
-    bottom: 100px;
-    right: 26px;
-    background: var(--purple-900);
-    color: #fff;
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-size: 14px;
-    max-width: 240px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(6px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    z-index: 999;
-  }
-
-  .toast.show {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.001ms !important;
@@ -476,7 +416,6 @@
   <p>Find quick answers below, or ask the voice assistant directly if you can't find what you need.</p>
   <div class="cta-row">
     <a href="#faq" class="btn btn-primary">Browse FAQ</a>
-    <button class="btn btn-ghost" onclick="showVoicePlaceholder()">🎙️ Ask the Voice Assistant</button>
   </div>
 </header>
 
@@ -616,40 +555,12 @@
   Can't find your answer? Use the voice assistant in the bottom-right corner. &mdash; <strong>Daythree</strong> Agent Support
 </footer>
 
-<!-- ============================================================
-     ELEVENLABS CONVERSATIONAL AI (VOICE BOT) EMBED
-     ------------------------------------------------------------
-     1. Get your embed snippet from the ElevenLabs Conversational AI
-        dashboard (elevenlabs.io -> Conversational AI -> your agent ->
-        Embed).
-     2. It typically looks like this:
-
-        <elevenlabs-convai agent-id="YOUR_AGENT_ID"></elevenlabs-convai>
-        <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
-
-     3. Paste both lines right below this comment. The widget renders
-        its own floating chat/voice bubble, so once it's added you can
-        delete the placeholder button/script further down this file
-        (search for "VOICE PLACEHOLDER").
-  ============================================================= -->
-
-
-
-<!-- ===================== VOICE PLACEHOLDER (remove once ElevenLabs widget above is added) ===================== -->
-<button class="voice-fab" onclick="showVoicePlaceholder()" aria-label="Ask the voice assistant" title="Ask the voice assistant">🎙️</button>
-<div class="toast" id="voiceToast">Voice assistant coming soon — check back once it's connected!</div>
+<!-- ===================== ELEVENLABS CONVERSATIONAL AI (VOICE BOT) EMBED ===================== -->
+<elevenlabs-convai agent-id="agent_7801kwb9b3kge1599qv88wdq5ydz"></elevenlabs-convai>
+<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
 
 <script>
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function showVoicePlaceholder() {
-    var toast = document.getElementById('voiceToast');
-    toast.classList.add('show');
-    clearTimeout(window._toastTimer);
-    window._toastTimer = setTimeout(function () {
-      toast.classList.remove('show');
-    }, 3000);
-  }
 
   /* ---------- Animated counter (question/category count) ---------- */
   var resultCountEl = document.getElementById('resultCount');
